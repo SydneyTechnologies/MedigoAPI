@@ -1,5 +1,6 @@
 # first import the fastapi library
 from fastapi import FastAPI, HTTPException, status, Depends
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from models import  *
 from utils import *
@@ -96,3 +97,36 @@ def list_prescriptions(user = Depends(get_current_user)) -> list[Prescription]:
     return presciption_list
 
 
+# Create the CRUD endpoints
+@app.post('/medications', response_model=Medication)
+async def create_medication(medication: Medication):
+    medication_dict = medication.dict()
+    result = db_client.MedigoApp.Medication.insert_one(medication_dict)
+    medication_dict['_id'] = result.inserted_id
+    return medication_dict
+
+@app.get('/medications/{medication_id}', response_model=Medication)
+async def read_medication(medication_id: str):
+    medication = db_client.MedigoApp.Medication.find_one({'_id': ObjectId(medication_id)})
+    if medication:
+        return medication
+    else:
+        raise HTTPException(status_code=404, detail='Medication not found')
+
+@app.put('/medications/{medication_id}', response_model=Medication)
+async def update_medication(medication_id: str, medication: Medication):
+    medication_dict = medication.dict()
+    result = db_client.MedigoApp.Medication.update_one({'_id': ObjectId(medication_id)}, {'$set': medication_dict})
+    if result.modified_count == 1:
+        medication_dict['_id'] = ObjectId(medication_id)
+        return medication_dict
+    else:
+        raise HTTPException(status_code=404, detail='Medication not found')
+
+@app.delete('/medications/{medication_id}')
+async def delete_medication(medication_id: str):
+    result = db_client.MedigoApp.Medication.delete_one({'_id': ObjectId(medication_id)})
+    if result.deleted_count == 1:
+        return JSONResponse(content={'message': 'Medication deleted successfully'})
+    else:
+        raise HTTPException(status_code=404, detail='Medication not found')
