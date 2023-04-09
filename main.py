@@ -82,30 +82,29 @@ def list_prescriptions(user = Depends(get_current_user)) -> list[Prescription]:
 async def create_medication(medication: Medication):
     medication_dict = medication.dict()
     result = db_client.MedigoApp.Medication.insert_one(medication_dict)
-    medication_dict['_id'] = result.inserted_id
-    return medication_dict
+    return Medication(**medication_dict)
 
-@app.get('/medications/{medication_id}', response_model=Medication)
-async def read_medication(medication_id: str):
-    medication = db_client.MedigoApp.Medication.find_one({'_id': ObjectId(medication_id)})
+@app.get('/medications/{medication_name}', response_model=Medication)
+async def read_medication(medication_name: str):
+    medication = db_client.MedigoApp.Medication.find_one({'name': medication_name})
     if medication:
         return medication
     else:
         raise HTTPException(status_code=404, detail='Medication not found')
 
-@app.put('/medications/{medication_id}', response_model=Medication)
-async def update_medication(medication_id: str, medication: Medication):
+@app.put('/medications/{medication_name}', response_model=Medication)
+async def update_medication(medication_name: str, medication: Medication):
     medication_dict = medication.dict()
-    result = db_client.MedigoApp.Medication.update_one({'_id': ObjectId(medication_id)}, {'$set': medication_dict})
+    result = db_client.MedigoApp.Medication.update_one({'name': medication_name}, {'$set': medication_dict})
     if result.modified_count == 1:
-        medication_dict['_id'] = ObjectId(medication_id)
-        return medication_dict
+        medication_dict
+        return Medication(**medication_dict)
     else:
         raise HTTPException(status_code=404, detail='Medication not found')
 
-@app.delete('/medications/{medication_id}')
-async def delete_medication(medication_id: str):
-    result = db_client.MedigoApp.Medication.delete_one({'_id': ObjectId(medication_id)})
+@app.delete('/medications/{medication_name}')
+async def delete_medication(medication_name: str):
+    result = db_client.MedigoApp.Medication.delete_one({'name': medication_name})
     if result.deleted_count == 1:
         return JSONResponse(content={'message': 'Medication deleted successfully'})
     else:
