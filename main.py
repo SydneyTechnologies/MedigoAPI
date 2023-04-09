@@ -65,26 +65,6 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
         "refresh_token": create_refresh_token(user["email"]),
     }
 
-# an endpoint to list all the medications 
-@app.get("/medications", response_model=list[Medication], summary="This endpoint will list up all the medications in the database if no query parameter is specified")
-def list_medications(type: MedicationType | None = None)->list[Medication]:
-    # get all the medications that are currently stored in the database
-    # using the optional query parameter type, we can return all the medications of the said type
-    if type is not None: 
-        search_parameter = {"medication_type": type}
-        medications = db_client.MedigoApp.Medication.find(search_parameter)
-    else:
-        medications = db_client.MedigoApp.Medication.find()
-    medication_list = []
-    for med in medications:
-        # we then need to convert the dictionary or (json) objects from the db in python classes 
-        # in this case our pydantic class Medication 
-        # using the ** we deconstruct the dictionary and use it to create a new Medication Object
-        med = Medication(**med)
-        # add the medications to the medication list
-        medication_list.append(med)
-    return medication_list
-
 # an endpoint to list all the prescriptions 
 @app.get("/prescriptions", summary="list all the prescriptions for the current user this is a protected route")
 def list_prescriptions(user = Depends(get_current_user)) -> list[Prescription]:
@@ -130,3 +110,23 @@ async def delete_medication(medication_id: str):
         return JSONResponse(content={'message': 'Medication deleted successfully'})
     else:
         raise HTTPException(status_code=404, detail='Medication not found')
+
+# an endpoint to list all the medications 
+@app.get("/medications", response_model=list[Medication], summary="This endpoint will list up all the medications in the database if no query parameter is specified")
+def list_medications(type: MedicationType | None = None)->list[Medication]:
+    # get all the medications that are currently stored in the database
+    # using the optional query parameter type, we can return all the medications of the said type
+    if type is not None: 
+        search_parameter = {"medication_type": type}
+        medications = db_client.MedigoApp.Medication.find(search_parameter)
+    else:
+        medications = db_client.MedigoApp.Medication.find()
+    medication_list = []
+    for med in medications:
+        # we then need to convert the dictionary or (json) objects from the db in python classes 
+        # in this case our pydantic class Medication 
+        # using the ** we deconstruct the dictionary and use it to create a new Medication Object
+        med = Medication(**med)
+        # add the medications to the medication list
+        medication_list.append(med)
+    return medication_list
