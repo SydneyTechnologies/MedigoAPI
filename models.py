@@ -38,7 +38,7 @@ class User(BaseModel):
     password: str
 
     mobile: str | None = None
-    Nationality: str
+    nationality: str
     full_name: str
     gender: Gender
     date_of_birth: str = Field(default=str(datetime.today()))
@@ -57,8 +57,8 @@ class User(BaseModel):
             "email": "example@example.com",
             "password": "password123",
             "mobile": "123-456-7890",
-            "Nationality": "USA",
-            "Gender": Gender.male,
+            "nationality": "USA",
+            "gender": Gender.male,
             "full_name": "John Doe",
             "date_of_birth":"2023-04-10",
             "marital_status": MaritalStatus.single,
