@@ -55,6 +55,8 @@ class User(BaseModel):
             "mobile": "123-456-7890",
             "Nationality": "USA",
             "full_name": "John Doe",
+            "date_of_birth":
+            "2023-04-10",
             "marital_status": MaritalStatus.single,
             "insurance_no": "123456789",
             "trusted_personnel": ["Jane Doe", "Bob Smith"],
