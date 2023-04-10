@@ -40,7 +40,7 @@ def register_user(user_data: User) -> User:
         return User(**inserted_user)
     
 @app.post("/login", summary="Login User")
-def login(form_data: OAuth2PasswordRequestForm = Depends()) -> AuthToken:
+def login(form_data: AuthLogin) -> AuthToken:
     user = db_client.MedigoApp.User.find_one({"email": form_data.username})
     if user is None:
         raise HTTPException(
